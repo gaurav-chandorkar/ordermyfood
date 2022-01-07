@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: GATEWAY-SERVICE
+  cloud:
+    gateway:
+      routes:
+        - id: review-service
+          uri: lb://restaurant-search-service
+          predicates:
+            - Path=/ordermyfood/**
+        - id: order-service
+          uri: lb://order-management-service
+          predicates:
+            - Path=/order/**
+server:
+  port: 8090
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka
+      defaultZone: http://localhost:8761/eureka

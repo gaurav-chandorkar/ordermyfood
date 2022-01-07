@@ -2,22 +2,28 @@ package com.gaurav.ordermanagementservice.controller;
 
 import com.gaurav.ordermanagementservice.OrderManagementServiceApplication;
 import com.gaurav.ordermanagementservice.Test;
+import com.gaurav.ordermanagementservice.dto.OrderMsgDto;
 import com.gaurav.ordermanagementservice.model.BillPayment;
 import com.gaurav.ordermanagementservice.model.OrderDetail;
 import com.gaurav.ordermanagementservice.service.OrderServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Random;
 
 @RestController
+@RequestMapping("/order")
 public class OrderManagementController {
 
     @Autowired
     OrderServiceImpl orderService;
+
+    //@Autowired
+    //private KafkaTemplate<String,Object> kafkaTemplate;
 
     private Logger logger = LoggerFactory.getLogger(OrderManagementController.class);
 
@@ -42,22 +48,25 @@ public class OrderManagementController {
             boolean isPaymentSuccess = processPayment(orderDetail, paymentMode);
             if (!isPaymentSuccess)
                 return false;
-
+            logger.info("is payment success: "+isPaymentSuccess);
             orderService.addOrder(orderDetail);
-
+            //kafkaTemplate.send("test-topic", "kafka, Order placed successfully");
+            //OrderMsgDto orderMsgDto=OrderMsgDto.builder().msg("Order has been placed successfully")
+              //      .amount(orderDetail.getAmountToBePaid()).build();
+           // kafkaTemplate.send("test-topic",(OrderMsgDto)orderMsgDto );
             return true;
         } else
             return false;
 
     }
 
-    @RequestMapping(value = "get-order-detail/{orderId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-order-detail/{orderId}", method = RequestMethod.GET)
     public OrderDetail getOrderById(@PathVariable long orderId) {
         logger.info("get-order-detail called");
         return orderService.displayOrder(orderId, 2L);
     }
 
-    @RequestMapping(value = "cancel-order/{orderId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/cancel-order/{orderId}", method = RequestMethod.POST)
     public boolean cancelOrder(@PathVariable long orderId) {
         logger.info("cancelOrder called");
         return orderService.cancelOrder(orderId);

@@ -5,6 +5,7 @@ import com.gaurav.restaurantsearchservice.repository.CuisineRepository;
 import com.gaurav.restaurantsearchservice.repository.FoodItemRepository;
 import com.gaurav.restaurantsearchservice.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,6 +29,15 @@ public class RestaurantSearchServiceApplication implements CommandLineRunner {
     @Autowired
     FoodItemRepository foodItemRepository;
 
+    @Value("${user}")
+    String  user;
+
+    @Value("${password}")
+    String password;
+
+    @Value("${spring.datasource.username}")
+    String dataSourceUserName;
+
     public static void main(String[] args) {
         SpringApplication.run(RestaurantSearchServiceApplication.class, args);
     }
@@ -40,6 +50,10 @@ public class RestaurantSearchServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println(" print datasourceUserName: "+dataSourceUserName);
+        System.out.println(" print user value: "+user);
+        System.out.println(" print password value: "+password);
+
         Restaurant restaurant1 = new Restaurant("Udapi", "mumbai", 0.25, 100d);
 
         List<Cuisine> cuisineList = new ArrayList<>();

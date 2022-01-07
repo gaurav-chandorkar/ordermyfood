@@ -1,12 +1,12 @@
-package com.gaurav.restaurantsearchservice;
+package com.demo.cloudcnfgserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-//@SpringBootTest
-class RestaurantSearchServiceApplicationTests {
+@SpringBootTest
+class DemoCloudConfigServerApplicationTests {
 
-   // @Test
+    @Test
     void contextLoads() {
     }
 

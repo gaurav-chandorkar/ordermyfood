@@ -6,12 +6,11 @@ import com.gaurav.restaurantsearchservice.model.Restaurant;
 import com.gaurav.restaurantsearchservice.model.Test;
 import com.gaurav.restaurantsearchservice.service.FoodItemService;
 import com.gaurav.restaurantsearchservice.service.RestaurantService;
-import com.gaurav.restaurantsearchservice.service.impl.FoodItemServiceImpl;
-import com.gaurav.restaurantsearchservice.service.impl.RestaurantServiceImpl;
 import com.gaurav.restaurantsearchservice.util.PrintOrderDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,6 +34,7 @@ public class RestaurantController {
 
     @RequestMapping("restaurant-nearby-user")
     public List<Restaurant> getRestaurantNearByUserLoc() {
+        logger.info("Search restaurant nearby user loc called ");
         List<Restaurant> restaurants = restaurantService.getRestaurantNearByUserLoc();
         if (restaurants != null) {
             return restaurants;
@@ -76,7 +76,7 @@ public class RestaurantController {
         try {
             logger.info("processOrder  called ");
             updateAmountToBePaid(orderDetail);
-            Boolean placedOrder = restTemplate.postForObject("http://order-management-service/place-order/" + paymentMode, orderDetail, Boolean.class);
+            Boolean placedOrder = restTemplate.postForObject("http://order-management-service/order/place-order/" + paymentMode, orderDetail, Boolean.class);
             logger.info("processOrder  status {} ", placedOrder);
             return Boolean.TRUE.equals(placedOrder) ? displayOrder(orderDetail) : printErrorMessage("Order could not be placed..");
         } catch (Exception e) {
@@ -94,7 +94,7 @@ public class RestaurantController {
             updateAmountToBePaid(orderDetail);
             rollBackStockForOriginalOrder(orderDetail.getOrderId());
             logger.info("updateOrder  called ");
-            Boolean placedOrder = restTemplate.postForObject("http://order-management-service/place-order/" + paymentMode, orderDetail, Boolean.class);
+            Boolean placedOrder = restTemplate.postForObject("http://order-management-service/order/place-order/" + paymentMode, orderDetail, Boolean.class);
             logger.info("updateOrder  status {} ", placedOrder);
             return Boolean.TRUE.equals(placedOrder) ? displayOrder(orderDetail) : printErrorMessage("Order could not be updated..");
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class RestaurantController {
         try {
             rollBackStockForOriginalOrder(orderId);
             Boolean orderCanceled =
-                    restTemplate.postForObject("http://order-management-service/cancel-order/" + orderId, null, Boolean.class);
+                    restTemplate.postForObject("http://order-management-service/order/cancel-order/" + orderId, null, Boolean.class);
             if (orderCanceled != null && orderCanceled) {
                 logger.info("send notification to Delivery team about cancelling order");
                 return printErrorMessage("Order canceled successfully!");
@@ -128,7 +128,7 @@ public class RestaurantController {
     private void rollBackStockForOriginalOrder(long orderId) {
         try {
             OrderDetail orderDetail =
-                    restTemplate.getForObject("http://order-management-service/get-order-detail/" + orderId, OrderDetail.class);
+                    restTemplate.getForObject("http://order-management-service/order/get-order-detail/" + orderId, OrderDetail.class);
             if (orderDetail != null && orderDetail.getFoodItems() != null
                     && orderDetail.getFoodItems().trim().length() > 1) {
                 String[] foodItems = orderDetail.getFoodItems().trim().split(",");
@@ -188,7 +188,7 @@ public class RestaurantController {
     public void test() {
         logger.info("1 test ");
 
-        Test test = restTemplate.postForObject("http://order-management-service/order", "Take Hello", Test.class);
+        Test test = restTemplate.postForObject("http://order-management-service/order/order", "Take Hello", Test.class);
         assert test != null;
         logger.info("test {}", test.str);
     }
@@ -197,10 +197,20 @@ public class RestaurantController {
     public String test1() {
         logger.info("1 test1 ");
 
-        String test = restTemplate.getForObject("http://order-management-service/test", String.class);
+        String test = restTemplate.getForObject("http://order-management-service/order/test", String.class);
         assert test != null;
         logger.info("test {}", test);
         return test;
     }
 
+    @KafkaListener(groupId = "java-1", topics = "test-topic", containerFactory = "kafkaListenerContainerFactory")
+    public void getMsgFromTopic(String data) {
+
+        logger.info("Kafka Consumer data : " + data);
+    }
+   /* @KafkaListener(groupId = "java-user-2", topics = "test-topic", containerFactory = "msgKafkaListenerContainerFactory")
+    public void getMsgObjFromTopic(OrderMsgDto msg) {
+
+        logger.info("Kafka Consumer msg : "+msg);
+    }*/
 }

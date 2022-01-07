@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-@SpringBootTest
+//@SpringBootTest
 class RestaurantServiceTest {
 
     Logger logger = LoggerFactory.getLogger(RestaurantServiceTest.class);
@@ -26,7 +26,7 @@ class RestaurantServiceTest {
     FoodItemService foodItemService;
 
 
-    @Test
+   /* @Test
     public void getMenuByRestaurantId() {
         List<FoodItem> foodItemList =
                 foodItemService.findFoodItemsByRestaurantID(Restaurant.builder().id(2L).build());
@@ -66,5 +66,5 @@ class RestaurantServiceTest {
     public void getNearByRestaurants() {
         List<Restaurant> restaurants = restaurantService.getRestaurantNearByUserLoc();
         logger.info(" getNearByRestaurants {}", restaurants);
-    }
+    }*/
 }
